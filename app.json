@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Adhan Pro by Ferdous",
+    "slug": "adhan-pro-ferdous",
+    "version": "0.1.0",
+    "sdkVersion": "48.0.0",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "android": {
+      "package": "com.ferdous.adhanpro"
+    },
+    "ios": {
+      "bundleIdentifier": "com.ferdous.adhanpro"
+    }
+  }
+}

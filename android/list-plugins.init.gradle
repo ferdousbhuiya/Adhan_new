@@ -1,0 +1,8 @@
+gradle.projectsEvaluated {
+    println '--- Project plugin summary ---'
+    rootProject.allprojects.each { p ->
+        def hasAndroid = p.plugins.hasPlugin('com.android.application') || p.plugins.hasPlugin('com.android.library')
+        println "${p.path}: androidPlugin=${hasAndroid} plugins=${p.plugins.collect{it.class.simpleName}}"
+    }
+    println '--- end summary ---'
+}

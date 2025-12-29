@@ -1,0 +1,5 @@
+// Init script to ensure compileSdkVersion is available on all projects
+// Keep minimal: set extraProperties early in beforeProject to avoid referencing rootProject
+gradle.beforeProject { project ->
+    project.extensions.extraProperties.set('compileSdkVersion', Integer.parseInt(project.findProperty('android.compileSdkVersion') ?: '33'))
+}

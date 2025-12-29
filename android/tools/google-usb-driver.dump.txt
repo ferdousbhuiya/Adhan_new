@@ -1,0 +1,11 @@
+Private Key:
+  PUBLICKEYBLOBEX
+  Version: 60
+  aiKeyAlg: 0x5954434f
+    Algorithm Class: 0x4000(2) ALG_CLASS_MSG_ENCRYPT
+    Algorithm Type: 0x200(1) ALG_TYPE_DSS
+    Algorithm Sub-id: 0x14f(335) ???
+  0000  50 45 20 68                                        PE h
+  0000  ...
+  05a1
+CertUtil: -dump command completed successfully.
