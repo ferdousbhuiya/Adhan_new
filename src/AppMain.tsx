@@ -7,7 +7,7 @@ import {
   Alert, 
   Platform,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   StatusBar,
   Dimensions,
   Switch,
@@ -80,19 +80,19 @@ const METHODS: { name: CalculationMethodName; label: string }[] = [
 
 function toHijri(date: Date): { day: number; month: string; year: number } {
   const hijriMonths = ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', 'Shaban', 'Ramadan', 'Shawwal', 'Dhul Qadah', 'Dhul Hijjah'];
-  const gregorian = date.getTime();
-  const hijriEpoch = new Date(622, 6, 16).getTime();
-  const daysSinceEpoch = Math.floor((gregorian - hijriEpoch) / (1000 * 60 * 60 * 24));
-  const hijriDays = daysSinceEpoch + 227014;
-  const cycles = Math.floor(hijriDays / 10631);
-  let remaining = hijriDays % 10631;
-  let year = cycles * 30;
-  const yearLengths = [354, 354, 355, 354, 354, 355, 354, 355, 354, 354, 355, 354, 354, 355, 354, 354, 355, 354, 355, 354, 354, 355, 354, 354, 355, 354, 355, 354, 354, 355];
-  for (let i = 0; i < 30 && remaining >= yearLengths[i]; i++) { remaining -= yearLengths[i]; year++; }
-  const monthLengths = [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 29];
-  let month = 0;
-  for (let i = 0; i < 12 && remaining >= monthLengths[i]; i++) { remaining -= monthLengths[i]; month++; }
-  return { day: remaining + 1, month: hijriMonths[month] || 'Unknown', year: year + 1 };
+  
+  // Use the same algorithm as IslamicCalendar
+  const jd = Math.floor((date.getTime() - new Date(1970, 0, 1).getTime()) / 86400000) + 2440588;
+  const l = jd - 1948440 + 10632;
+  const n = Math.floor((l - 1) / 10631);
+  const l2 = l - 10631 * n + 354;
+  const j = Math.floor((10985 - l2) / 5316) * Math.floor((50 * l2) / 17719) + Math.floor(l2 / 5670) * Math.floor((43 * l2) / 15238);
+  const l3 = l2 - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+  const month = Math.floor((24 * l3) / 709);
+  const day = l3 - Math.floor((709 * month) / 24);
+  const year = 30 * n + j - 30;
+  
+  return { day, month: hijriMonths[month - 1] || 'Unknown', year };
 }
 
 export default function AppMain() {
@@ -187,7 +187,9 @@ export default function AppMain() {
 
   useEffect(() => {
     if (!prayerTimes) return;
-    const updatePrayers = () => {
+    
+    // Calculate current and next prayer ONCE (not every second)
+    const calculatePrayers = () => {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
@@ -204,7 +206,6 @@ export default function AppMain() {
       let current: { name: string; time: Date; endTime: Date } | null = null;
       let next: { name: string; time: Date } | null = null;
       
-      // Find current and next prayer
       for (let i = 0; i < prayers.length; i++) {
         const nextPrayerTime = i < prayers.length - 1 ? prayers[i + 1].time : new Date(tomorrow.getTime() + prayerTimes.fajr.getHours() * 3600000 + prayerTimes.fajr.getMinutes() * 60000);
         
@@ -213,7 +214,6 @@ export default function AppMain() {
           if (i < prayers.length - 1) {
             next = prayers[i + 1];
           } else {
-            // After Isha, next is Fajr tomorrow
             const tomorrowFajr = new Date(tomorrow);
             tomorrowFajr.setHours(prayerTimes.fajr.getHours(), prayerTimes.fajr.getMinutes(), 0, 0);
             next = { name: 'Fajr', time: tomorrowFajr };
@@ -222,15 +222,21 @@ export default function AppMain() {
         }
       }
       
-      // Before Fajr - no current prayer, next is Fajr
       if (!current && now < prayers[0].time) {
         next = prayers[0];
       }
       
-      setCurrentPrayer(current);
-      setNextPrayer(next);
+      return { current, next };
+    };
+
+    const { current, next } = calculatePrayers();
+    setCurrentPrayer(current);
+    setNextPrayer(next);
+
+    // Only update countdown strings (not recalculate prayers)
+    const updateCountdowns = () => {
+      const now = new Date();
       
-      // Current prayer countdown: time remaining until this prayer period ends (next prayer starts)
       if (current && current.endTime) {
         const remaining = current.endTime.getTime() - now.getTime();
         if (remaining > 0) {
@@ -243,7 +249,6 @@ export default function AppMain() {
         setCurrentCountdown('');
       }
       
-      // Next prayer countdown: time until next prayer starts
       if (next) {
         const diff = next.time.getTime() - now.getTime();
         if (diff > 0) {
@@ -256,8 +261,10 @@ export default function AppMain() {
         }
       }
     };
-    updatePrayers();
-    const interval = setInterval(updatePrayers, 1000);
+    
+    updateCountdowns();
+    // Update every 10 seconds instead of every 1 second to reduce re-renders
+    const interval = setInterval(updateCountdowns, 10000);
     return () => clearInterval(interval);
   }, [prayerTimes]);
 
@@ -315,9 +322,9 @@ export default function AppMain() {
         <View style={styles.currentPrayerCard}>
           <View style={styles.currentPrayerHeader}>
             <Text style={styles.currentPrayerLabel}>🟢 CURRENT PRAYER</Text>
-            <TouchableOpacity style={[styles.prayedButton, prayedToday.includes(currentPrayer.name) && styles.prayedButtonActive]} onPress={() => togglePrayed(currentPrayer.name)}>
+            <Pressable style={({ pressed }) => [styles.prayedButton, prayedToday.includes(currentPrayer.name) && styles.prayedButtonActive, pressed && { opacity: 0.7 }]} onPress={() => togglePrayed(currentPrayer.name)}>
               <Text style={styles.prayedButtonText}>{prayedToday.includes(currentPrayer.name) ? '✓ Prayed' : 'Mark Prayed'}</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
           <View style={styles.currentPrayerRow}>
             <Text style={styles.currentPrayerIcon}>{PRAYER_ICONS[currentPrayer.name]}</Text>
@@ -365,7 +372,7 @@ export default function AppMain() {
           {prayers.map((prayer) => {
             const isPast = prayer.time < new Date(), isCurrent = currentPrayer?.name === prayer.name, isNext = nextPrayer?.name === prayer.name, isPrayed = prayedToday.includes(prayer.name);
             return (
-              <TouchableOpacity key={prayer.name} style={[styles.prayerItem, isCurrent && styles.prayerItemCurrent, isNext && styles.prayerItemNext, isPast && !isCurrent && !isNext && styles.prayerItemPast]} onPress={() => prayer.name !== 'Sunrise' && togglePrayed(prayer.name)} activeOpacity={0.7}>
+              <Pressable key={prayer.name} style={({ pressed }) => [styles.prayerItem, isCurrent && styles.prayerItemCurrent, isNext && styles.prayerItemNext, isPast && !isCurrent && !isNext && styles.prayerItemPast, pressed && { opacity: 0.7 }]} onPress={() => prayer.name !== 'Sunrise' && togglePrayed(prayer.name)}>
                 <View style={styles.prayerLeft}>
                   <Text style={[styles.prayerIcon, isPast && !isCurrent && !isNext && styles.prayerIconPast]}>{PRAYER_ICONS[prayer.name]}</Text>
                   <View><Text style={[styles.prayerName, isPast && !isCurrent && !isNext && styles.prayerNamePast]}>{prayer.name}</Text><Text style={styles.prayerArabicSmall}>{PRAYER_ARABIC[prayer.name]}</Text></View>
@@ -374,16 +381,16 @@ export default function AppMain() {
                   <Text style={[styles.prayerTime, isPast && !isCurrent && !isNext && styles.prayerTimePast]}>{formatTime(prayer.time)}</Text>
                   {prayer.name !== 'Sunrise' && <Text style={[styles.prayerStatus, isPrayed && styles.prayerStatusPrayed]}>{isPrayed ? '✓' : '○'}</Text>}
                 </View>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
 
-        <TouchableOpacity style={styles.methodSelector} onPress={() => setShowMethods(!showMethods)}>
+        <Pressable style={({ pressed }) => [styles.methodSelector, pressed && { opacity: 0.7 }]} onPress={() => setShowMethods(!showMethods)}>
           <Text style={styles.methodLabel}>Calculation Method</Text>
           <Text style={styles.methodValue}>{METHODS.find(m => m.name === method)?.label || method} ▼</Text>
-        </TouchableOpacity>
-        {showMethods && <View style={styles.methodList}>{METHODS.map(m => <TouchableOpacity key={m.name} style={[styles.methodOption, method === m.name && styles.methodOptionActive]} onPress={() => { setMethod(m.name); setShowMethods(false); }}><Text style={[styles.methodOptionText, method === m.name && styles.methodOptionTextActive]}>{m.label}</Text></TouchableOpacity>)}</View>}
+        </Pressable>
+        {showMethods && <View style={styles.methodList}>{METHODS.map(m => <Pressable key={m.name} style={({ pressed }) => [styles.methodOption, method === m.name && styles.methodOptionActive, pressed && { opacity: 0.7 }]} onPress={() => { setMethod(m.name); setShowMethods(false); }}><Text style={[styles.methodOptionText, method === m.name && styles.methodOptionTextActive]}>{m.label}</Text></Pressable>)}</View>}
 
         <View style={styles.actions}>
           <View style={styles.silentModeContainer}>
@@ -398,21 +405,21 @@ export default function AppMain() {
 
           <View style={styles.reminderContainer}>
             <Text style={styles.reminderLabel}>⏰ Pre-Adhan Reminder</Text>
-            <View style={styles.reminderOptions}>{[0, 5, 10, 15, 30].map(mins => <TouchableOpacity key={mins} style={[styles.reminderOption, preAdhanReminder === mins && styles.reminderOptionActive]} onPress={() => saveReminder(mins)}><Text style={[styles.reminderOptionText, preAdhanReminder === mins && styles.reminderOptionTextActive]}>{mins === 0 ? 'Off' : `${mins}m`}</Text></TouchableOpacity>)}</View>
+            <View style={styles.reminderOptions}>{[0, 5, 10, 15, 30].map(mins => <Pressable key={mins} style={({ pressed }) => [styles.reminderOption, preAdhanReminder === mins && styles.reminderOptionActive, pressed && { opacity: 0.7 }]} onPress={() => saveReminder(mins)}><Text style={[styles.reminderOptionText, preAdhanReminder === mins && styles.reminderOptionTextActive]}>{mins === 0 ? 'Off' : `${mins}m`}</Text></Pressable>)}</View>
           </View>
 
-          <TouchableOpacity style={[styles.actionButton, scheduled && styles.actionButtonActive]} onPress={onSchedule}><Text style={styles.actionIcon}>🔔</Text><Text style={styles.actionText}>{scheduled ? 'Notifications Active' : 'Enable Notifications'}</Text></TouchableOpacity>
-          {scheduled && <TouchableOpacity style={[styles.actionButton, styles.actionButtonDanger]} onPress={async () => { await cancelAllScheduledNotifications(); setScheduled(false); Alert.alert('Cancelled', 'All notifications cancelled.'); }}><Text style={styles.actionIcon}>🔕</Text><Text style={styles.actionText}>Cancel Notifications</Text></TouchableOpacity>}
-          <TouchableOpacity style={styles.actionButton} onPress={onTestNotification}><Text style={styles.actionIcon}>⏰</Text><Text style={styles.actionText}>Test Notification (1 min)</Text></TouchableOpacity>
+          <Pressable style={({ pressed }) => [styles.actionButton, scheduled && styles.actionButtonActive, pressed && { opacity: 0.7 }]} onPress={onSchedule}><Text style={styles.actionIcon}>🔔</Text><Text style={styles.actionText}>{scheduled ? 'Notifications Active' : 'Enable Notifications'}</Text></Pressable>
+          {scheduled && <Pressable style={({ pressed }) => [styles.actionButton, styles.actionButtonDanger, pressed && { opacity: 0.7 }]} onPress={async () => { await cancelAllScheduledNotifications(); setScheduled(false); Alert.alert('Cancelled', 'All notifications cancelled.'); }}><Text style={styles.actionIcon}>🔕</Text><Text style={styles.actionText}>Cancel Notifications</Text></Pressable>}
+          <Pressable style={({ pressed }) => [styles.actionButton, pressed && { opacity: 0.7 }]} onPress={onTestNotification}><Text style={styles.actionIcon}>⏰</Text><Text style={styles.actionText}>Test Notification (1 min)</Text></Pressable>
           
           <View style={styles.playStopRow}>
-            <TouchableOpacity style={[styles.actionButton, styles.playButton]} onPress={() => playAdhan(undefined, nextPrayer?.name)}><Text style={styles.actionIcon}>▶️</Text><Text style={styles.actionText}>Play Adhan</Text></TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, styles.stopButton]} onPress={stopAdhan}><Text style={styles.actionIcon}>⏹️</Text><Text style={styles.actionText}>Stop</Text></TouchableOpacity>
+            <Pressable style={({ pressed }) => [styles.actionButton, styles.playButton, pressed && { opacity: 0.7 }]} onPress={() => playAdhan(undefined, nextPrayer?.name)}><Text style={styles.actionIcon}>▶️</Text><Text style={styles.actionText}>Play Adhan</Text></Pressable>
+            <Pressable style={({ pressed }) => [styles.actionButton, styles.stopButton, pressed && { opacity: 0.7 }]} onPress={stopAdhan}><Text style={styles.actionIcon}>⏹️</Text><Text style={styles.actionText}>Stop</Text></Pressable>
           </View>
 
-          <TouchableOpacity style={styles.actionButton} onPress={() => setShowVoices(true)}><Text style={styles.actionIcon}>🎵</Text><Text style={styles.actionText}>Select Adhan Voice</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={() => setShowDua(true)}><Text style={styles.actionIcon}>🤲</Text><Text style={styles.actionText}>Dua After Adhan</Text></TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.calendarButton]} onPress={() => setShowCalendar(true)}><Text style={styles.actionIcon}>📅</Text><Text style={styles.actionText}>Islamic Calendar & Events</Text></TouchableOpacity>
+          <Pressable style={({ pressed }) => [styles.actionButton, pressed && { opacity: 0.7 }]} onPress={() => setShowVoices(true)}><Text style={styles.actionIcon}>🎵</Text><Text style={styles.actionText}>Select Adhan Voice</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, pressed && { opacity: 0.7 }]} onPress={() => setShowDua(true)}><Text style={styles.actionIcon}>🤲</Text><Text style={styles.actionText}>Dua After Adhan</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.calendarButton, pressed && { opacity: 0.7 }]} onPress={() => setShowCalendar(true)}><Text style={styles.actionIcon}>📅</Text><Text style={styles.actionText}>Islamic Calendar & Events</Text></Pressable>
         </View>
 
         <View style={styles.footer}><Text style={styles.footerText}>🕌 Adhan Pro</Text><Text style={styles.footerSubtext}>by Ferdous</Text></View>
@@ -429,7 +436,7 @@ export default function AppMain() {
               <Text style={styles.duaTranslit}>{DUA_AFTER_ADHAN.transliteration}</Text>
               <Text style={styles.duaTranslation}>{DUA_AFTER_ADHAN.translation}</Text>
             </ScrollView>
-            <TouchableOpacity style={styles.duaCloseBtn} onPress={() => setShowDua(false)}><Text style={styles.duaCloseBtnText}>Close</Text></TouchableOpacity>
+            <Pressable style={({ pressed }) => [styles.duaCloseBtn, pressed && { opacity: 0.7 }]} onPress={() => setShowDua(false)}><Text style={styles.duaCloseBtnText}>Close</Text></Pressable>
           </View>
         </View>
       </Modal>

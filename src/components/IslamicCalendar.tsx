@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   Modal,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -163,13 +164,21 @@ export default function IslamicCalendar({ visible, onClose }: Props) {
     return days;
   }, [currentHijri, selectedMonth]);
 
+  // Don't render anything if not visible
+  if (!visible) return null;
+
   return (
     <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.closeX} onPress={onClose}>
+          <Pressable 
+            style={({ pressed }) => [styles.closeX, pressed && { opacity: 0.5 }]} 
+            onPress={onClose}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          >
             <Text style={styles.closeXText}>✕</Text>
-          </TouchableOpacity>
+          </Pressable>
           <Text style={styles.headerIcon}>📅</Text>
           <Text style={styles.headerTitle}>Islamic Calendar</Text>
           <Text style={styles.headerArabic}>التقويم الهجري</Text>
@@ -178,26 +187,36 @@ export default function IslamicCalendar({ visible, onClose }: Props) {
           </Text>
         </View>
 
-          {/* Tab Switcher */}
-          <View style={styles.tabContainer}>
-            <TouchableOpacity
-              style={[styles.tab, viewMode === 'events' && styles.tabActive]}
-              onPress={() => setViewMode('events')}
-            >
-              <Text style={[styles.tabText, viewMode === 'events' && styles.tabTextActive]}>
-                🎉 Events
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, viewMode === 'calendar' && styles.tabActive]}
-              onPress={() => setViewMode('calendar')}
-            >
-              <Text style={[styles.tabText, viewMode === 'calendar' && styles.tabTextActive]}>
-                📆 Calendar
-              </Text>
-            </TouchableOpacity>
-          </View>
+        {/* Tab Switcher */}
+        <View style={styles.tabContainer}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.tab, 
+              viewMode === 'events' && styles.tabActive,
+              pressed && { opacity: 0.7 }
+            ]}
+            onPress={() => setViewMode('events')}
+          >
+            <Text style={[styles.tabText, viewMode === 'events' && styles.tabTextActive]}>
+              🎉 Events
+            </Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [
+              styles.tab, 
+              viewMode === 'calendar' && styles.tabActive,
+              pressed && { opacity: 0.7 }
+            ]}
+            onPress={() => setViewMode('calendar')}
+          >
+            <Text style={[styles.tabText, viewMode === 'calendar' && styles.tabTextActive]}>
+              📆 Calendar
+            </Text>
+          </Pressable>
+        </View>
 
+        {/* Content Area */}
+        <View style={styles.contentArea}>
           {viewMode === 'events' ? (
             /* Events View */
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -245,12 +264,13 @@ export default function IslamicCalendar({ visible, onClose }: Props) {
                     const isCurrentMonth = currentHijri.month === index + 1;
                     
                     return (
-                      <TouchableOpacity
+                      <Pressable
                         key={month.english}
-                        style={[
+                        style={({ pressed }) => [
                           styles.monthCard,
                           isCurrentMonth && styles.monthCardCurrent,
-                          eventsInMonth.length > 0 && styles.monthCardHasEvents
+                          eventsInMonth.length > 0 && styles.monthCardHasEvents,
+                          pressed && { opacity: 0.7 }
                         ]}
                         onPress={() => {
                           setSelectedMonth(index);
@@ -270,7 +290,7 @@ export default function IslamicCalendar({ visible, onClose }: Props) {
                             ))}
                           </View>
                         )}
-                      </TouchableOpacity>
+                      </Pressable>
                     );
                   })}
                 </View>
@@ -281,24 +301,26 @@ export default function IslamicCalendar({ visible, onClose }: Props) {
             <View style={styles.calendarView}>
               {/* Month Selector */}
               <View style={styles.monthSelector}>
-                <TouchableOpacity
-                  style={styles.monthNavBtn}
+                <Pressable
+                  style={({ pressed }) => [styles.monthNavBtn, pressed && { opacity: 0.5 }]}
                   onPress={() => setSelectedMonth(prev => prev > 0 ? prev - 1 : 11)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <Text style={styles.monthNavText}>◀</Text>
-                </TouchableOpacity>
+                </Pressable>
                 <View style={styles.monthDisplay}>
                   <Text style={styles.monthDisplayArabic}>{HIJRI_MONTHS[selectedMonth]?.arabic}</Text>
                   <Text style={styles.monthDisplayEnglish}>
                     {HIJRI_MONTHS[selectedMonth]?.english} {currentHijri.year} AH
                   </Text>
                 </View>
-                <TouchableOpacity
-                  style={styles.monthNavBtn}
+                <Pressable
+                  style={({ pressed }) => [styles.monthNavBtn, pressed && { opacity: 0.5 }]}
                   onPress={() => setSelectedMonth(prev => prev < 11 ? prev + 1 : 0)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <Text style={styles.monthNavText}>▶</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
 
               {/* Day Headers */}
@@ -311,7 +333,7 @@ export default function IslamicCalendar({ visible, onClose }: Props) {
               </View>
 
               {/* Calendar Grid */}
-              <ScrollView style={styles.calendarScroll}>
+              <ScrollView style={styles.calendarScroll} showsVerticalScrollIndicator={false}>
                 <View style={styles.calendarGrid}>
                   {/* Empty cells for alignment */}
                   {calendarDays.length > 0 && Array(calendarDays[0].gregorianDate.getDay()).fill(null).map((_, i) => (
@@ -367,30 +389,35 @@ export default function IslamicCalendar({ visible, onClose }: Props) {
               </ScrollView>
             </View>
           )}
+        </View>
 
-          {/* Close Button */}
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <Text style={styles.closeBtnText}>Close</Text>
-          </TouchableOpacity>
-      </View>
+        {/* Close Button - Always visible at bottom */}
+        <Pressable 
+          style={({ pressed }) => [styles.closeBtn, pressed && { opacity: 0.7, backgroundColor: '#b8962e' }]} 
+          onPress={onClose}
+        >
+          <Text style={styles.closeBtnText}>Close</Text>
+        </Pressable>
+      </SafeAreaView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1a4a3a', paddingTop: 50, paddingHorizontal: 20 },
+  container: { flex: 1, backgroundColor: '#1a4a3a', paddingTop: 20, paddingHorizontal: 20 },
   header: { alignItems: 'center', marginBottom: 15, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' },
-  closeX: { position: 'absolute', top: 0, right: 0, padding: 10, zIndex: 10 },
-  closeXText: { fontSize: 24, color: '#fff', fontWeight: '300' },
+  closeX: { position: 'absolute', top: -5, right: -5, padding: 15, zIndex: 100 },
+  closeXText: { fontSize: 28, color: '#fff', fontWeight: '300' },
   headerIcon: { fontSize: 40, marginBottom: 8 },
   headerTitle: { fontSize: 22, fontWeight: '700', color: '#d4af37' },
   headerArabic: { fontSize: 18, color: '#a8d5ba', marginTop: 4 },
   currentDate: { fontSize: 14, color: '#fff', marginTop: 8, opacity: 0.9 },
   tabContainer: { flexDirection: 'row', marginBottom: 15, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 12, padding: 4 },
-  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
+  tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 10 },
   tabActive: { backgroundColor: '#d4af37' },
-  tabText: { fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.7)' },
+  tabText: { fontSize: 15, fontWeight: '600', color: 'rgba(255,255,255,0.7)' },
   tabTextActive: { color: '#1a4a3a' },
+  contentArea: { flex: 1 },
   scrollView: { flex: 1 },
   sectionTitle: { fontSize: 11, fontWeight: '600', color: '#a8d5ba', letterSpacing: 1.5, marginBottom: 15 },
   eventCard: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 16, padding: 16, marginBottom: 12, borderLeftWidth: 4 },
