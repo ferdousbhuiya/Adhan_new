@@ -111,8 +111,7 @@ def reactNativeArchitectures() {
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-    // Explicitly set compileSdkVersion to avoid evaluation issues in this environment
-    compileSdkVersion 33
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     namespace 'com.ferdous.adhanpro'
     defaultConfig {

@@ -40,18 +40,3 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
-
-// Diagnostic task: print compileSdkVersion (if available) for each project to help find missing settings
-subprojects {
-    afterEvaluate { project ->
-        try {
-            if (project.hasProperty('android')) {
-                println "[DIAG] project ${project.path} compileSdkVersion -> ${project.android.compileSdkVersion ?: 'null'}"
-            } else {
-                println "[DIAG] project ${project.path} has no android extension"
-            }
-        } catch (Exception e) {
-            println "[DIAG] project ${project.path} android read failed: ${e.message}"
-        }
-    }
-}
