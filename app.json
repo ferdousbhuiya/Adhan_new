@@ -13,6 +13,12 @@
     },
     "ios": {
       "bundleIdentifier": "com.ferdous.adhanpro"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f2f031f0-8881-42fa-a4e1-6640663c44ad"
+      }
+    },
+    "owner": "ferdous_bhuiya"
   }
 }
