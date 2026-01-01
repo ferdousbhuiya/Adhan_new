@@ -177,17 +177,17 @@ const MosqueFinder: React.FC<MosqueFinderProps> = ({ visible, onClose }) => {
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Mosque Finder</Text>
-        <Text style={styles.subtitle}>Find nearby mosques and prayer times</Text>
-        {onClose && (
-          <Pressable onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeText}>✕</Text>
-          </Pressable>
-        )}
-      </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Mosque Finder</Text>
+            <Text style={styles.subtitle}>Find nearby mosques and prayer times</Text>
+            {onClose && (
+              <Pressable onPress={onClose} style={styles.closeButton}>
+                <Text style={styles.closeText}>✕</Text>
+              </Pressable>
+            )}
+          </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {loading ? (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>🕌 Finding nearby mosques...</Text>
@@ -314,7 +314,7 @@ const MosqueFinder: React.FC<MosqueFinderProps> = ({ visible, onClose }) => {
             • Help keep the mosque clean and well-maintained
           </Text>
         </View>
-        </View>
+        </ScrollView>
       </View>
     </Modal>
   );

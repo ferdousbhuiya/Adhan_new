@@ -219,17 +219,17 @@ const LocationServices: React.FC<LocationServicesProps> = ({ visible, onClose })
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Location Services</Text>
-        <Text style={styles.subtitle}>Manage location for prayer times and Qibla</Text>
-        {onClose && (
-          <Pressable onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeText}>✕</Text>
-          </Pressable>
-        )}
-      </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Location Services</Text>
+            <Text style={styles.subtitle}>Manage location for prayer times and Qibla</Text>
+            {onClose && (
+              <Pressable onPress={onClose} style={styles.closeButton}>
+                <Text style={styles.closeText}>✕</Text>
+              </Pressable>
+            )}
+          </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Permission Status */}
         <View style={styles.statusCard}>
           <Text style={styles.statusTitle}>Location Permission</Text>
@@ -382,7 +382,7 @@ const LocationServices: React.FC<LocationServicesProps> = ({ visible, onClose })
             • You can clear location history anytime
           </Text>
         </View>
-        </View>
+        </ScrollView>
       </View>
     </Modal>
   );
