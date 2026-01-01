@@ -28,6 +28,15 @@ import * as Notifications from 'expo-notifications';
 import { Audio } from 'expo-av';
 import AdhanVoiceSelector, { getAdhanUrlForPrayer } from './components/AdhanVoiceSelector';
 import IslamicCalendar from './components/IslamicCalendar';
+import IslamicLogo from './components/IslamicLogo';
+import QiblaCompass from './components/QiblaCompass';
+import QuranReader from './components/QuranReader';
+import RamadanTracker from './components/RamadanTracker';
+import TasbihCounter from './components/TasbihCounter';
+import DhikrCollection from './components/DhikrCollection';
+import HalalFood from './components/HalalFood';
+import MosqueFinder from './components/MosqueFinder';
+import LocationServices from './components/LocationServices';
 
 const SILENT_MODE_KEY = 'ADHAN_SILENT_MODE';
 const PRAYED_KEY = 'PRAYERS_PRAYED_TODAY';
@@ -104,6 +113,15 @@ export default function AppMain() {
   const [showMethods, setShowMethods] = useState(false);
   const [showDua, setShowDua] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+  const [showQibla, setShowQibla] = useState(false);
+  const [showQuran, setShowQuran] = useState(false);
+  const [showRamadan, setShowRamadan] = useState(false);
+  const [showTasbih, setShowTasbih] = useState(false);
+  const [showDhikr, setShowDhikr] = useState(false);
+  const [showHalalFood, setShowHalalFood] = useState(false);
+  const [showMosqueFinder, setShowMosqueFinder] = useState(false);
+  const [showLocationServices, setShowLocationServices] = useState(false);
   const [currentPrayer, setCurrentPrayer] = useState<{ name: string; time: Date; endTime: Date } | null>(null);
   const [nextPrayer, setNextPrayer] = useState<{ name: string; time: Date } | null>(null);
   const [currentCountdown, setCurrentCountdown] = useState('');
@@ -420,6 +438,15 @@ export default function AppMain() {
           <Pressable style={({ pressed }) => [styles.actionButton, pressed && { opacity: 0.7 }]} onPress={() => setShowVoices(true)}><Text style={styles.actionIcon}>🎵</Text><Text style={styles.actionText}>Select Adhan Voice</Text></Pressable>
           <Pressable style={({ pressed }) => [styles.actionButton, pressed && { opacity: 0.7 }]} onPress={() => setShowDua(true)}><Text style={styles.actionIcon}>🤲</Text><Text style={styles.actionText}>Dua After Adhan</Text></Pressable>
           <Pressable style={({ pressed }) => [styles.actionButton, styles.calendarButton, pressed && { opacity: 0.7 }]} onPress={() => setShowCalendar(true)}><Text style={styles.actionIcon}>📅</Text><Text style={styles.actionText}>Islamic Calendar & Events</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.logoButton, pressed && { opacity: 0.7 }]} onPress={() => setShowLogo(true)}><Text style={styles.actionIcon}>🕌</Text><Text style={styles.actionText}>Islamic Logo</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.qiblaButton, pressed && { opacity: 0.7 }]} onPress={() => setShowQibla(true)}><Text style={styles.actionIcon}>🧭</Text><Text style={styles.actionText}>Qibla Compass</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.quranButton, pressed && { opacity: 0.7 }]} onPress={() => setShowQuran(true)}><Text style={styles.actionIcon}>📖</Text><Text style={styles.actionText}>Quran Reader</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.ramadanButton, pressed && { opacity: 0.7 }]} onPress={() => setShowRamadan(true)}><Text style={styles.actionIcon}>🌙</Text><Text style={styles.actionText}>Ramadan Tracker</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.tasbihButton, pressed && { opacity: 0.7 }]} onPress={() => setShowTasbih(true)}><Text style={styles.actionIcon}>📿</Text><Text style={styles.actionText}>Tasbih Counter</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.dhikrButton, pressed && { opacity: 0.7 }]} onPress={() => setShowDhikr(true)}><Text style={styles.actionIcon}>📖</Text><Text style={styles.actionText}>Adhkar Collection</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.halalButton, pressed && { opacity: 0.7 }]} onPress={() => setShowHalalFood(true)}><Text style={styles.actionIcon}>🍽️</Text><Text style={styles.actionText}>Halal Food Finder</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.mosqueButton, pressed && { opacity: 0.7 }]} onPress={() => setShowMosqueFinder(true)}><Text style={styles.actionIcon}>🕌</Text><Text style={styles.actionText}>Mosque Finder</Text></Pressable>
+          <Pressable style={({ pressed }) => [styles.actionButton, styles.locationButton, pressed && { opacity: 0.7 }]} onPress={() => setShowLocationServices(true)}><Text style={styles.actionIcon}>📍</Text><Text style={styles.actionText}>Location Services</Text></Pressable>
         </View>
 
         <View style={styles.footer}><Text style={styles.footerText}>🕌 Adhan Pro</Text><Text style={styles.footerSubtext}>by Ferdous</Text></View>
@@ -442,6 +469,15 @@ export default function AppMain() {
       </Modal>
 
       <IslamicCalendar visible={showCalendar} onClose={() => setShowCalendar(false)} />
+      <IslamicLogo visible={showLogo} onClose={() => setShowLogo(false)} />
+      <QiblaCompass visible={showQibla} onClose={() => setShowQibla(false)} />
+      <QuranReader visible={showQuran} onClose={() => setShowQuran(false)} />
+      <RamadanTracker visible={showRamadan} onClose={() => setShowRamadan(false)} />
+      <TasbihCounter visible={showTasbih} onClose={() => setShowTasbih(false)} />
+      <DhikrCollection visible={showDhikr} onClose={() => setShowDhikr(false)} />
+      <HalalFood visible={showHalalFood} onClose={() => setShowHalalFood(false)} />
+      <MosqueFinder visible={showMosqueFinder} onClose={() => setShowMosqueFinder(false)} />
+      <LocationServices visible={showLocationServices} onClose={() => setShowLocationServices(false)} />
     </View>
   );
 }
@@ -540,6 +576,15 @@ const styles = StyleSheet.create({
   actionButtonActive: { backgroundColor: '#e8f5e9', borderWidth: 2, borderColor: '#4caf50' },
   actionButtonDanger: { backgroundColor: '#ffebee' },
   calendarButton: { backgroundColor: '#e8f0fe', borderWidth: 2, borderColor: '#1a4a3a' },
+  logoButton: { backgroundColor: '#f3e8ff', borderWidth: 2, borderColor: '#6b21a8' },
+  qiblaButton: { backgroundColor: '#fef3c7', borderWidth: 2, borderColor: '#d97706' },
+  quranButton: { backgroundColor: '#ecfdf5', borderWidth: 2, borderColor: '#059669' },
+  ramadanButton: { backgroundColor: '#fdf2f8', borderWidth: 2, borderColor: '#be185d' },
+  tasbihButton: { backgroundColor: '#fefce8', borderWidth: 2, borderColor: '#ca8a04' },
+  dhikrButton: { backgroundColor: '#f0f9ff', borderWidth: 2, borderColor: '#0369a1' },
+  halalButton: { backgroundColor: '#f0fdf4', borderWidth: 2, borderColor: '#16a34a' },
+  mosqueButton: { backgroundColor: '#fef7ff', borderWidth: 2, borderColor: '#7c3aed' },
+  locationButton: { backgroundColor: '#fff7ed', borderWidth: 2, borderColor: '#c2410c' },
   actionIcon: { fontSize: 26, marginRight: 14 },
   actionText: { fontSize: 16, fontWeight: '500', color: '#333' },
   footer: { alignItems: 'center', paddingVertical: 30 },
