@@ -217,22 +217,21 @@ const DhikrCollection: React.FC<DhikrCollectionProps> = ({ visible, onClose }) =
   const categories = [...DHIKR_CATEGORIES, 'Favorites'];
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Adhkar Collection</Text>
-        <Text style={styles.subtitle}>Islamic Remembrances</Text>
-        {onClose && (
+    <Modal visible={visible} onRequestClose={onClose} animationType="slide" presentationStyle="pageSheet">
+      <View style={styles.modalContainer}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Adhkar Collection</Text>
+          <Text style={styles.subtitle}>Islamic Remembrances</Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeText}>✕</Text>
           </Pressable>
-        )}
-      </View>
+        </View>
 
-      {/* Category Tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryTabs}
+        {/* Category Tabs */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryTabs}
         contentContainerStyle={styles.categoryTabsContent}
       >
         {categories.map((category) => (
@@ -334,11 +333,16 @@ const DhikrCollection: React.FC<DhikrCollectionProps> = ({ visible, onClose }) =
           </Text>
         </View>
       </ScrollView>
-    </View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#0d1f17',
+  },
   container: {
     flex: 1,
     backgroundColor: '#0d1f17',

@@ -8,6 +8,7 @@ import {
   Dimensions,
   Alert,
   Switch,
+  Modal,
 } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,7 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width } = Dimensions.get('window');
 
 interface LocationServicesProps {
-  onClose?: () => void;
+  visible: boolean;
+  onClose: () => void;
 }
 
 interface LocationData {
@@ -26,7 +28,7 @@ interface LocationData {
   address?: string;
 }
 
-const LocationServices: React.FC<LocationServicesProps> = ({ onClose }) => {
+const LocationServices: React.FC<LocationServicesProps> = ({ visible, onClose }) => {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
   const [highAccuracy, setHighAccuracy] = useState(false);
@@ -214,7 +216,9 @@ const LocationServices: React.FC<LocationServicesProps> = ({ onClose }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalContainer}>
+        <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Location Services</Text>
         <Text style={styles.subtitle}>Manage location for prayer times and Qibla</Text>
@@ -378,12 +382,17 @@ const LocationServices: React.FC<LocationServicesProps> = ({ onClose }) => {
             • You can clear location history anytime
           </Text>
         </View>
-      </ScrollView>
-    </View>
+        </View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#0d1f17',
+  },
   container: {
     flex: 1,
     backgroundColor: '#0d1f17',

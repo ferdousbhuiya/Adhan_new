@@ -8,13 +8,15 @@ import {
   Dimensions,
   Alert,
   Linking,
+  Modal,
 } from 'react-native';
 import * as Location from 'expo-location';
 
 const { width } = Dimensions.get('window');
 
 interface MosqueFinderProps {
-  onClose?: () => void;
+  visible: boolean;
+  onClose: () => void;
 }
 
 interface Mosque {
@@ -32,7 +34,7 @@ interface Mosque {
   website?: string;
 }
 
-const MosqueFinder: React.FC<MosqueFinderProps> = ({ onClose }) => {
+const MosqueFinder: React.FC<MosqueFinderProps> = ({ visible, onClose }) => {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [mosques, setMosques] = useState<Mosque[]>([]);
   const [loading, setLoading] = useState(false);
@@ -172,7 +174,9 @@ const MosqueFinder: React.FC<MosqueFinderProps> = ({ onClose }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalContainer}>
+        <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Mosque Finder</Text>
         <Text style={styles.subtitle}>Find nearby mosques and prayer times</Text>
@@ -310,12 +314,17 @@ const MosqueFinder: React.FC<MosqueFinderProps> = ({ onClose }) => {
             • Help keep the mosque clean and well-maintained
           </Text>
         </View>
-      </ScrollView>
-    </View>
+        </View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#0d1f17',
+  },
   container: {
     flex: 1,
     backgroundColor: '#0d1f17',

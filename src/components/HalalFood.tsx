@@ -9,13 +9,15 @@ import {
   TextInput,
   Alert,
   Linking,
+  Modal,
 } from 'react-native';
 import * as Location from 'expo-location';
 
 const { width } = Dimensions.get('window');
 
 interface HalalFoodProps {
-  onClose?: () => void;
+  visible: boolean;
+  onClose: () => void;
 }
 
 interface Restaurant {
@@ -31,7 +33,7 @@ interface Restaurant {
   image?: string;
 }
 
-const HalalFood: React.FC<HalalFoodProps> = ({ onClose }) => {
+const HalalFood: React.FC<HalalFoodProps> = ({ visible, onClose }) => {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(false);
@@ -201,19 +203,18 @@ const HalalFood: React.FC<HalalFoodProps> = ({ onClose }) => {
   });
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Halal Food Finder</Text>
-        <Text style={styles.subtitle}>Find nearby halal restaurants</Text>
-        {onClose && (
+    <Modal visible={visible} onRequestClose={onClose} animationType="slide" presentationStyle="pageSheet">
+      <View style={styles.modalContainer}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Halal Food Finder</Text>
+          <Text style={styles.subtitle}>Find nearby halal restaurants</Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeText}>✕</Text>
           </Pressable>
-        )}
-      </View>
+        </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Search restaurants or cuisine..."
@@ -334,11 +335,16 @@ const HalalFood: React.FC<HalalFoodProps> = ({ onClose }) => {
           </Text>
         </View>
       </ScrollView>
-    </View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#0d1f17',
+  },
   container: {
     flex: 1,
     backgroundColor: '#0d1f17',
