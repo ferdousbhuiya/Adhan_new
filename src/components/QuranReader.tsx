@@ -8,13 +8,15 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  Modal,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 const { width, height } = Dimensions.get('window');
 
 interface QuranReaderProps {
-  onClose?: () => void;
+  visible: boolean;
+  onClose: () => void;
 }
 
 interface Surah {
@@ -32,7 +34,7 @@ interface Ayah {
   numberInSurah: number;
 }
 
-const QuranReader: React.FC<QuranReaderProps> = ({ onClose }) => {
+const QuranReader: React.FC<QuranReaderProps> = ({ visible, onClose }) => {
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
@@ -153,23 +155,24 @@ const QuranReader: React.FC<QuranReaderProps> = ({ onClose }) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <Modal visible={visible} onRequestClose={onClose} animationType="slide" presentationStyle="pageSheet">
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </Modal>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Quran Reader</Text>
-        {onClose && (
+    <Modal visible={visible} onRequestClose={onClose} animationType="slide" presentationStyle="pageSheet">
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Quran Reader</Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeText}>✕</Text>
           </Pressable>
-        )}
-      </View>
+        </View>
 
       {showSurahList ? (
         <ScrollView style={styles.surahList}>
@@ -226,7 +229,8 @@ const QuranReader: React.FC<QuranReaderProps> = ({ onClose }) => {
           </ScrollView>
         </View>
       )}
-    </View>
+      </View>
+    </Modal>
   );
 };
 

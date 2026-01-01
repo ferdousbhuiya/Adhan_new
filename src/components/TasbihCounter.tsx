@@ -7,13 +7,15 @@ import {
   ScrollView,
   Dimensions,
   Alert,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
 interface TasbihCounterProps {
-  onClose?: () => void;
+  visible: boolean;
+  onClose: () => void;
 }
 
 interface DhikrPhrase {
@@ -62,7 +64,7 @@ const DHIKR_PHRASES: DhikrPhrase[] = [
   },
 ];
 
-const TasbihCounter: React.FC<TasbihCounterProps> = ({ onClose }) => {
+const TasbihCounter: React.FC<TasbihCounterProps> = ({ visible, onClose }) => {
   const [currentCount, setCurrentCount] = useState(0);
   const [selectedDhikr, setSelectedDhikr] = useState<DhikrPhrase>(DHIKR_PHRASES[0]);
   const [totalCounts, setTotalCounts] = useState<{ [key: string]: number }>({});
@@ -146,18 +148,17 @@ const TasbihCounter: React.FC<TasbihCounterProps> = ({ onClose }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Tasbih Counter</Text>
-        <Text style={styles.subtitle}>Digital Dhikr Beads</Text>
-        {onClose && (
+    <Modal visible={visible} onRequestClose={onClose} animationType="slide" presentationStyle="pageSheet">
+      <View style={styles.modalContainer}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Tasbih Counter</Text>
+          <Text style={styles.subtitle}>Digital Dhikr Beads</Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeText}>✕</Text>
           </Pressable>
-        )}
-      </View>
+        </View>
 
-      <ScrollView style={styles.content}>
+        <ScrollView style={styles.content}>
         {/* Current Dhikr Display */}
         <View style={styles.dhikrCard}>
           <Pressable
@@ -260,11 +261,16 @@ const TasbihCounter: React.FC<TasbihCounterProps> = ({ onClose }) => {
           </Text>
         </View>
       </ScrollView>
-    </View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#0d1f17',
+  },
   container: {
     flex: 1,
     backgroundColor: '#0d1f17',

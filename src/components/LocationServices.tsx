@@ -128,8 +128,6 @@ const LocationServices: React.FC<LocationServicesProps> = ({ onClose }) => {
     try {
       const options: Location.LocationOptions = {
         accuracy: highAccuracy ? Location.Accuracy.High : Location.Accuracy.Balanced,
-        maximumAge: 10000, // Accept locations up to 10 seconds old
-        timeout: 15000, // Timeout after 15 seconds
       };
 
       const currentLocation = await Location.getCurrentPositionAsync(options);

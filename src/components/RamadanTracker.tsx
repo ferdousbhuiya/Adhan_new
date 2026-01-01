@@ -7,13 +7,15 @@ import {
   Pressable,
   Dimensions,
   Alert,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 interface RamadanTrackerProps {
-  onClose?: () => void;
+  visible: boolean;
+  onClose: () => void;
 }
 
 interface RamadanDay {
@@ -27,7 +29,7 @@ interface RamadanDay {
   notes: string;
 }
 
-const RamadanTracker: React.FC<RamadanTrackerProps> = ({ onClose }) => {
+const RamadanTracker: React.FC<RamadanTrackerProps> = ({ visible, onClose }) => {
   const [ramadanDays, setRamadanDays] = useState<RamadanDay[]>([]);
   const [currentDay, setCurrentDay] = useState(1);
   const [selectedDay, setSelectedDay] = useState<RamadanDay | null>(null);
@@ -163,18 +165,17 @@ const RamadanTracker: React.FC<RamadanTrackerProps> = ({ onClose }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Ramadan Tracker</Text>
-        <Text style={styles.subtitle}>Day {currentDay} of 30</Text>
-        {onClose && (
+    <Modal visible={visible} onRequestClose={onClose} animationType="slide" presentationStyle="pageSheet">
+      <View style={styles.modalContainer}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Ramadan Tracker</Text>
+          <Text style={styles.subtitle}>Day {currentDay} of 30</Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeText}>✕</Text>
           </Pressable>
-        )}
-      </View>
+        </View>
 
-      <ScrollView style={styles.content}>
+        <ScrollView style={styles.content}>
         {/* Stats Overview */}
         <View style={styles.statsContainer}>
           <Text style={styles.statsTitle}>Your Ramadan Progress</Text>
@@ -328,11 +329,16 @@ const RamadanTracker: React.FC<RamadanTrackerProps> = ({ onClose }) => {
           </View>
         </View>
       )}
-    </View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#0d1f17',
+  },
   container: {
     flex: 1,
     backgroundColor: '#0d1f17',

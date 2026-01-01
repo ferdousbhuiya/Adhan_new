@@ -7,6 +7,7 @@ import {
   Pressable,
   Dimensions,
   Share,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -23,7 +24,8 @@ interface DhikrItem {
 }
 
 interface DhikrCollectionProps {
-  onClose?: () => void;
+  visible: boolean;
+  onClose: () => void;
 }
 
 const DHIKR_CATEGORIES = [
@@ -113,7 +115,7 @@ const PRAISE_ADHKAR: DhikrItem[] = [
   },
 ];
 
-const DhikrCollection: React.FC<DhikrCollectionProps> = ({ onClose }) => {
+const DhikrCollection: React.FC<DhikrCollectionProps> = ({ visible, onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState('Morning & Evening');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [completedDhikr, setCompletedDhikr] = useState<{ [key: string]: boolean }>({});
